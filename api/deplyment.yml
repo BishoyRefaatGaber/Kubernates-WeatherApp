@@ -1,0 +1,38 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-pod 
+  template:
+    metadata:
+      labels:
+        app: api-pod
+    spec:
+      containers:
+      - name: api-pod
+        image: afakharany/weatherapp-weather:lab
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 5000
+            name: http
+            protocol: TCP
+        env:
+          - name: APIKEY
+            valueFrom:
+              secretKeyRef:
+                key: apikey
+                name: api-secret
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http 
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+

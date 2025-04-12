@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db-pod
+spec:
+  selector:
+    matchLabels:
+      app: db-pod     # pod label 
+  serviceName: "db-svc"   #headless service name
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: db-pod
+    spec:
+      containers:
+      - name: db-cont
+        image: mysql:5.7
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-secret
+                key: root-password
+          - name: MYSQL_AUTH_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-secret
+                key: auth-password
+          - name: MYSQL_USER
+            value: authuser
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-secret
+                key: auth-password                  
+  volumeClaimTemplates:
+  - metadata:
+      name: db-pv
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "standard"
+      resources:
+        requests:
+          storage: 10Gi

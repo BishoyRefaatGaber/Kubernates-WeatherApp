@@ -1,0 +1,42 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ui-pod 
+  template:
+    metadata:
+      labels:
+        app: ui-pod
+    spec:
+      containers:
+      - name: ui-pod
+        image: afakharany/weatherapp-ui:lab
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 3000
+            name: http
+            protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http 
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http    
+        env:
+          - name: AUTH_HOST
+            value: auth-svc
+          - name: AUTH_PORT
+            value: "8080"
+          - name: WEATHER_HOST
+            value: api-svc
+          - name: WEATHER_PORT
+            value: "5000"
+
+

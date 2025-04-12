@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: db-init-pod
+        image: mysql:5.7
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: root-password
+        - name: MYSQL_AUTH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: auth-password
+        - name: MYSQL_HOST
+          value: "db-svc"  # Set the MySQL Service name or hostname
+        - name: MYSQL_PORT
+          value: "3306"  # MySQL port, default is 3306
+        - name: MYSQL_USER
+          value: "authuser"  
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          mysql -h${MYSQL_HOST} -P${MYSQL_PORT} -uroot -p${MYSQL_ROOT_PASSWORD} <<EOF
+          CREATE DATABASE IF NOT EXISTS weatherapp;
+
+          -- Create user for external access (%)
+          CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_AUTH_PASSWORD}';
+          GRANT ALL PRIVILEGES ON weatherapp.* TO '${MYSQL_USER}'@'%';
+
+          -- Create user for internal access (localhost)
+          CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'localhost' IDENTIFIED BY '${MYSQL_AUTH_PASSWORD}';
+          GRANT ALL PRIVILEGES ON weatherapp.* TO '${MYSQL_USER}'@'localhost';
+
+          FLUSH PRIVILEGES;
+          EOF
+      restartPolicy: Never      
+
+
+
+# GRANT ALL PRIVILEGES ON weatherapp.* TO 'authuser'@'%' IDENTIFIED BY 'my-secret-pw';
+# FLUSH PRIVILEGES;
+
+# GRANT ALL PRIVILEGES ON weatherapp.* TO 'authuser'@'localhost' IDENTIFIED BY 'my-secret-pw';
+# FLUSH PRIVILEGES;
