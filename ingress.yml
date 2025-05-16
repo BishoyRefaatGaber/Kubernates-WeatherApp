@@ -7,16 +7,18 @@ spec:
   tls:
     - hosts:
         - weatherapp.local
-      sercretName: weatherapp-ui-tls
+      secretName: weatherapp-ui-tls
   rules:
     - host: weatherapp.local
       http:
+        paths:
         - path: /
           pathType: Prefix
           backend:
             service:
               name: ui-svc
-              port: 3000     
+              port: 
+                number: 3000     
  
 
 

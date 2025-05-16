@@ -12,3 +12,10 @@ spec:
     targetPort: 8080
     protocol: TCP
 
+# kubectl run alpine -it --image=alpine -- sh
+
+# apk add curl
+
+# curl -X POST http://weatherapp-auth:8080/users \
+# -H "Content-Type: application/json" \
+# -d '{"username":"testuser","password":"testpassword"}'

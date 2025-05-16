@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: db-cont
-        image: mysql:5.7
+        image: mysql
         env:
           - name: MYSQL_ROOT_PASSWORD
             valueFrom:
@@ -33,13 +33,36 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: db-secret
-                key: auth-password                  
-  volumeClaimTemplates:
-  - metadata:
-      name: db-pv
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      storageClassName: "standard"
-      resources:
-        requests:
-          storage: 10Gi
+                key: auth-password
+        # resources:
+        #   requests:
+        #     cpu: "500m" 
+        #     memory: "1Gi"
+        #   limits:
+        #     cpu: "800m"
+        #     memory: "2Gi"                             
+        volumeMounts:
+        - name: db-vol
+          mountPath: /var/lib/mysql
+        # - name: config-volume
+        #   mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: db-vol
+          persistentVolumeClaim:
+            claimName: db-pvc  
+        # - name: config-volume
+        #   configMap:
+        #     name: mysql-config      
+
+
+  # volumeClaimTemplates:
+  # - metadata:
+  #     name: db-pv
+  #   spec:
+  #     accessModes: [ "ReadWriteOnce" ]
+  #     storageClassName: "standard"
+  #     resources:
+  #       requests:
+  #         storage: 10Gi
+
+
